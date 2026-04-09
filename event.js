@@ -1,5 +1,7 @@
 const EventEmitter = require("events");
 const http = require("http");
+const HOST = "127.0.0.1";
+const PORT = 8000;
 
 class Sales extends EventEmitter {
   constructor() {
@@ -22,14 +24,21 @@ myEmitter.on("newSale", (stock) => {
 
 myEmitter.emit("newSale", 9);
 
-const server = http.createServer();
-
-server.on("request", (req, res) => {
+const server = http.createServer((req, res) => {
   console.log("request received");
   res.writeHead(200, { "Content-Type": "text/plain" });
   res.end("Request received");
 });
 
-server.listen(8000, "127.0.0.1", () => {
+server.on("error", (err) => {
+  if (err.code === "EADDRINUSE") {
+    console.log(`Port ${PORT} is already in use.`);
+    return;
+  }
+
+  console.log("Server error:", err.message);
+});
+
+server.listen(PORT, HOST, () => {
   console.log("waiting for requests...");
 });
